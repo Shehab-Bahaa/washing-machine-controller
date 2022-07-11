@@ -1,10 +1,8 @@
 /*
 Project        : Controller Unit For a Washing Machine 
-Standard doc.  : 
-Module name    : 
+Module name    : washing_machine_controller
 Dependancy     :
-Design doc.    : 
-References     : 
+Design doc.    : Digital Design Assignment
 Description    : 
 Owner          : Shehab Bahaa
 */
@@ -29,8 +27,7 @@ module washing_machine_controller (
 				S_FILLING_WATER   = 3'b001,
 				S_WASHING         = 3'b010,
 				S_RINSING         = 3'b011,
-				S_SPINNING        = 3'b100,
-				S_XXX             = 'x;
+				S_SPINNING        = 3'b100;
 
 //=========================================================
 // reg declarations
@@ -45,7 +42,7 @@ module washing_machine_controller (
 				spinning_duration;      // number of clock cycles for each state
 
 //=========================================================
-// function definitions 
+// task definitions 
 //=========================================================
 	task states_duration ();
 		case (clk_freq)
@@ -73,12 +70,6 @@ module washing_machine_controller (
 						rinsing_duration        <= 32'h39387000;
 						spinning_duration       <= 32'h1c9c3800;
 						end
-			default :   begin 
-						filling_water_duration  <= 'x;
-						washing_duration        <= 'x;
-						rinsing_duration        <= 'x;   // for debugging
-						spinning_duration       <= 'x;
-						end
 		endcase
 	endtask 
 //=========================================================
@@ -88,20 +79,19 @@ module washing_machine_controller (
 		if (!rst_n)     begin   
 			state           		<= S_IDLE;
 			wash_done       		<= 0;
-			clock_count     		<= '0;
+			clock_count     		<= 0;
 			second_wash_flag 		<= 0;
 			paused_spinning_flag 	<= 0;
 		end
 		else begin
-			state           		<= S_XXX;         	// pre-default-X assignment 
-			wash_done 				<= 0;				// pre-default output assignment
 			case (state)
-				S_IDLE          : if (paused_spinning_flag) begin 
+				S_IDLE          : // 
+								  if (paused_spinning_flag) begin 
 										clock_count 			<= clock_count;
 										if (timer_pause) 								state <= S_IDLE;	//@ loopback
 										else 											state <= S_SPINNING;
 									end else begin
-										clock_count 			<= '0;
+										clock_count 			<= 0;
 										if (coin_in) begin 
 											wash_done       	<= 0;
 											second_wash_flag	<= 0;
@@ -111,49 +101,52 @@ module washing_machine_controller (
 										else begin
 											wash_done 			<= wash_done;
 																						state <= S_IDLE;		//@ loopback 
-										end 
-								  end 
-				S_FILLING_WATER : if (clock_count < filling_water_duration - 1) begin
+										end // if coin_in
+								  end // if paused_spinning_flag
+				S_FILLING_WATER : // 
+								  if (clock_count < filling_water_duration - 1) begin
 									clock_count <= clock_count + 1;
 																						state <= S_FILLING_WATER;	//@ loopback 
 								  end else begin
-									clock_count <= '0;
+									clock_count <= 0;
 																						state <= S_WASHING;
-								  end
-				S_WASHING       : if (clock_count < washing_duration - 1) begin
+								  end // if clock_count < filling_water_duration - 1
+				S_WASHING       : // 
+								  if (clock_count < washing_duration - 1) begin
 									clock_count <= clock_count + 1;
 																						state <= S_WASHING;		//@ loopback 
 								  end else begin
-									clock_count <= '0;
+									clock_count <= 0;
 																						state <= S_RINSING;
-								  end
-				S_RINSING       : if (clock_count < rinsing_duration - 1) begin
+								  end // if clock_count < washing_duration - 1
+				S_RINSING       : // 
+								  if (clock_count < rinsing_duration - 1) begin
 									clock_count <= clock_count + 1;
 																						state <= S_RINSING;		//@ loopback 
 								  end else begin
-									clock_count <= '0;
+									clock_count <= 0;
 									if (double_wash) begin 
 										second_wash_flag <= ~second_wash_flag;
 										if (second_wash_flag)							state <= S_WASHING;
 										else 											state <= S_SPINNING;
 									end else 											state <= S_SPINNING;
-								  end
-				S_SPINNING      : if (clock_count < spinning_duration - 1) 
+								  end // if clock_count < rinsing_duration - 1
+				S_SPINNING      : // 
+								  if (clock_count < spinning_duration - 1) 
 									if (timer_pause) begin
 										paused_spinning_flag 	<= 1;
 																						state <= S_IDLE;
 									end else begin
 										clock_count 			<= clock_count + 1;
 																						state <= S_SPINNING; 	//@ loopback
-									end
+									end // if timer_pause
  								 else begin
 									paused_spinning_flag 		<= 0;
 									wash_done 					<= 1;			// Mealy output
 																						state <= S_IDLE;
-								 end
-				default         : 														state <= S_XXX;
+								 end // if clock_count < spinning_duration - 1
 			endcase
-			end
+			end // if !rst_n
 endmodule
 //=========================================================
 // EOF 
