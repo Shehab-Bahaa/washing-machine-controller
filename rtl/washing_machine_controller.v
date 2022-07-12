@@ -117,6 +117,8 @@ module washing_machine_controller (
 																						state <= S_WASHING;		//@ loopback 
 								  end else begin
 									clock_count <= 0;
+									if (double_wash) 
+										second_wash_flag <= ~second_wash_flag;
 																						state <= S_RINSING;
 								  end // if clock_count < washing_duration - 1
 				S_RINSING       : // 
@@ -125,22 +127,19 @@ module washing_machine_controller (
 																						state <= S_RINSING;		//@ loopback 
 								  end else begin
 									clock_count <= 0;
-									if (double_wash) begin 
-										second_wash_flag <= ~second_wash_flag;
-										if (second_wash_flag)							state <= S_WASHING;
-										else 											state <= S_SPINNING;
-									end else 											state <= S_SPINNING;
+									if (second_wash_flag)								state <= S_WASHING;
+									else 												state <= S_SPINNING;
 								  end // if clock_count < rinsing_duration - 1
 				S_SPINNING      : // 
-								  if (clock_count < spinning_duration - 1) 
+								  if (clock_count < spinning_duration - 1) begin
+									clock_count 			<= clock_count + 1;
 									if (timer_pause) begin
 										paused_spinning_flag 	<= 1;
 																						state <= S_IDLE;
 									end else begin
-										clock_count 			<= clock_count + 1;
 																						state <= S_SPINNING; 	//@ loopback
 									end // if timer_pause
- 								 else begin
+								  end else begin
 									paused_spinning_flag 		<= 0;
 									wash_done 					<= 1;			// Mealy output
 																						state <= S_IDLE;
