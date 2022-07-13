@@ -13,6 +13,8 @@ module tb_washing_machine_controller;
 	wire  		wash_done;
 	// clock generation variables
 	real 		clock_period = 1; // 1us
+	//
+	reg TEST2 = 0;
 	// monitoring variables
 	real		state_start_time;
 	real		state_end_time;
@@ -74,121 +76,56 @@ module tb_washing_machine_controller;
 		end
 	endtask
 
-	task test1();
-	//==============================================================
-	// Test Scenario (1): No double_wash and no timer_pause (1MHZ clock) 
-	//==============================================================
+	task generic_test();
 		begin
-			$display("//=============================================================================\n// Test Scenario 1 started (No double_wash and no timer_pause with 1 MHZ clock)\n//=============================================================================");
+			if (TEST2)	$display("//=============================================================================\n// Test Scenario started (double_wash and timer_pause)\n//=============================================================================");
+			else		$display("//=============================================================================\n// Test Scenario started (No double_wash and no timer_pause)\n//=============================================================================");			
 			fork
 				// Driving
 				begin
-									clk_freq 	= 2'b00;
-									coin_in		= 1;
-									double_wash = 0;
-									timer_pause = 0;
-					@(negedge clk)	coin_in 	= 0;
+											coin_in		= 1;
+					if (TEST2)				double_wash = 1;
+					else					double_wash = 0;
+											timer_pause = 0;
+						@(negedge clk)		coin_in 	= 0;
+					if (TEST2) begin			
+						@(DUT.state == 4)	
+						#(0.5*10**6*60)		timer_pause = 1;	// start the pause in the middle of the spinning phase
+						#(1*10**6*60)		timer_pause = 0;	// the pause duration is one minute
+					end
 				end
 				// Monitoring
 				begin
-									if (DUT.state === 0) 	$display("\"SUCCESSFUL IDLE state\""); 
-									else begin 				$display("\"FAILED IDLE state\""); $finish; end
-					@(DUT.state)	checkers(0, "IDLE", "FILLING WATER", 0);
-					@(DUT.state)	checkers(2, "FILLING WATER", "WASHING", 0);
-					@(DUT.state)	checkers(5, "WASHING", "RINSING", 0);
-					@(DUT.state)	checkers(2, "RINSING", "SPINNING", 0);
-					@(DUT.state)	checkers(1, "SPINNING", "IDLE", 1);
-									if (wash_done == 1) 
-										$display("\"SUCCESSFUL wash done\""); 
-									else begin 
-										$display("\"FAILED wash done\" \nEXPECTED: 1, OBSERVED: 0"); 
-										$finish; 
-									end
+											if (DUT.state === 0) 	$display("\"SUCCESSFUL IDLE state\""); 
+											else begin 				$display("\"FAILED IDLE state\""); $finish; end
+						@(DUT.state)		checkers(0, "IDLE", "FILLING WATER", 0);
+						@(DUT.state)		checkers(2, "FILLING WATER", "WASHING", 0);
+						@(DUT.state)		checkers(5, "WASHING", "RINSING", 0);
+					if (TEST2)	begin
+						@(DUT.state)		checkers(2, "RINSING", "WASHING", 0);
+						@(DUT.state)		checkers(5, "WASHING", "RINSING", 0);
+					end	
+						@(DUT.state)		checkers(2, "RINSING", "SPINNING", 0);
+					if (TEST2) begin	
+						@(DUT.state)		checkers(0.5, "SPINNING", "IDLE", 0);
+						@(DUT.state)		checkers(1, "IDLE", "SPINNING", 0);
+						@(DUT.state)		checkers(0.5, "SPINNING", "IDLE", 1);
+					end else begin
+						@(DUT.state)		checkers(1, "SPINNING", "IDLE", 1);
+					end
+											if (wash_done == 1) 
+												$display("\"SUCCESSFUL wash done\""); 
+											else begin 
+												$display("\"FAILED wash done\" \nEXPECTED: 1, OBSERVED: 0"); 
+												$finish; 
+											end
 				end
 			join
-			$display("//=============================================================\n// Test Scenario 1 finished successfully\n//=============================================================");
+			#100;
+			$display("//=============================================================\n// Test Scenario finished successfully\n//=============================================================");
 		end
 	endtask
 
-	task test2();
-	//==================================================================
-	// Test Scenario (2): double_wash but no timer_pause (2MHZ clock) 
-	//==================================================================
-		begin
-			$display("//=============================================================================\n// Test Scenario 2 started (double_wash but no timer_pause with 2 MHZ clock)\n//=============================================================================");
-			fork
-				// Driving
-				begin
-									clk_freq 	= 2'b01;
-									coin_in		= 1;
-									double_wash = 1;
-									timer_pause = 0;
-					@(negedge clk)	coin_in 	= 0;
-				end
-				// Monitoring
-				begin
-									if (DUT.state === 0) 	$display("\"SUCCESSFUL IDLE state\""); 
-									else begin 				$display("\"FAILED IDLE state\""); $finish; end
-					@(DUT.state)	checkers(0, "IDLE", "FILLING WATER", 0);
-					@(DUT.state)	checkers(2, "FILLING WATER", "WASHING", 0);
-					@(DUT.state)	checkers(5, "WASHING", "RINSING", 0);
-					@(DUT.state)	checkers(2, "RINSING", "WASHING", 0);
-					@(DUT.state)	checkers(5, "WASHING", "RINSING", 0);
-					@(DUT.state)	checkers(2, "RINSING", "SPINNING", 0);
-					@(DUT.state)	checkers(1, "SPINNING", "IDLE", 1);
-									if (wash_done == 1) 
-										$display("\"SUCCESSFUL wash done\""); 
-									else begin 
-										$display("\"FAILED wash done\" \nEXPECTED: 1, OBSERVED: 0"); 
-										$finish; 
-									end
-				end
-			join
-			$display("//=============================================================\n// Test Scenario 2 finished successfully\n//=============================================================");
-		end
-	endtask
-
-	task test3();
-	//==============================================================
-	// Test Scenario (3): No double_wash and no timer_pause (4MHZ clock) 
-	//==============================================================
-		begin
-			$display("//=============================================================================\n// Test Scenario 3 started (No double_wash but with timer_pause with 3 MHZ clock)\n//=============================================================================");
-			fork
-				// Driving
-				begin
-										clk_freq 	= 2'b00;
-										coin_in		= 1;
-										double_wash = 0;
-										timer_pause = 0;
-					@(negedge clk)		coin_in 	= 0;
-					@(DUT.state == 4)	
-					#(0.5*10**6*60)		timer_pause = 1;	// start the pause in the middle of the spinning phase
-					#(1*10**6*60)		timer_pause = 0;	// the pause duration is one minute
-
-				end
-				// Monitoring
-				begin
-									if (DUT.state === 0) 	$display("\"SUCCESSFUL IDLE state\""); 
-									else begin 				$display("\"FAILED IDLE state\""); $finish; end
-					@(DUT.state)	checkers(0, "IDLE", "FILLING WATER", 0);
-					@(DUT.state)	checkers(2, "FILLING WATER", "WASHING", 0);
-					@(DUT.state)	checkers(5, "WASHING", "RINSING", 0);
-					@(DUT.state)	checkers(2, "RINSING", "SPINNING", 0);
-					@(DUT.state)	checkers(0.5, "SPINNING", "IDLE", 0);
-					@(DUT.state)	checkers(1, "IDLE", "SPINNING", 0);
-					@(DUT.state)	checkers(0.5, "SPINNING", "IDLE", 1);
-									if (wash_done == 1) 
-										$display("\"SUCCESSFUL wash done\""); 
-									else begin 
-										$display("\"FAILED wash done\" \nEXPECTED: 1, OBSERVED: 0"); 
-										$finish; 
-									end
-				end
-			join
-			$display("//=============================================================\n// Test Scenario 3 finished successfully\n//=============================================================");
-		end
-	endtask
 //=========================================================
 // Clock Generation
 //=========================================================
@@ -206,19 +143,19 @@ module tb_washing_machine_controller;
 // Main Code
 //=========================================================
 	initial begin
-		$monitor("[$monitor] time= %0tns, state = %0d", $realtime, DUT.state);
+		//$monitor("[$monitor] time= %0t, state = %0d", $realtime, DUT.state);
 		// RESET
 		rst_n = 0;
 		@(negedge clk)	rst_n 		= 1;
 		@(negedge clk)
 		// Selecting the test scenario
-		`ifdef test1	test1();
-		`elsif test2	test2();
-		`elsif test3	test3();
-		`elsif test4
-		`endif
-
-		#100;
+		clk_freq 	= 2'b10;
+		generic_test();
+		TEST2 = 1;
+		#(0.5*10**6*60)
+		@(negedge clk)
+		clk_freq 	= 2'b11;
+		generic_test();
 		$finish;
 	end
 
