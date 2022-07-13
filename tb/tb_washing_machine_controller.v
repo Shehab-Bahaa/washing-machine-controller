@@ -1,3 +1,11 @@
+/*
+Project        : Controller Unit For a Washing Machine 
+Module name    : tb_washing_machine_controller
+Dependancy     :
+Design doc.    : Digital Design Assignment
+Description    : 
+Owner          : Shehab Bahaa
+*/
 `timescale 1us/100ps
 
 module tb_washing_machine_controller;
@@ -160,6 +168,8 @@ module tb_washing_machine_controller;
 	end
 
 endmodule
- 
+//=========================================================
+// EOF 
+//=========================================================
 
 

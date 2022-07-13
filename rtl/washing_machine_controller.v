@@ -10,13 +10,13 @@ module washing_machine_controller (
 	input rst_n,    // Active low asynchronous clock
 	input clk,      // System clock
 
-	input [1:0] clk_freq,   //
+	input [1:0] clk_freq,   // Input Clock Frequency Configuration Code
 	// control inputs
-	input coin_in,
-	input double_wash,
-	input timer_pause,
+	input coin_in,			// Input flag which is asserted when a coin is deposited
+	input double_wash,		// Input flag which is asserted if the user requires double wash option
+	input timer_pause,		// Input flag when it is set to ‘1’ spinning phase is paused until this flag is de-asserted
 	// outputs
-	output reg wash_done
+	output reg wash_done	// Active high output asserted when spinning phase is done and deasserted when coin_in is set to ‘1’
 );
 
 //=========================================================
@@ -44,26 +44,32 @@ module washing_machine_controller (
 //=========================================================
 // task definitions 
 //=========================================================
+	// decoding the 
 	task states_duration ();
+		// decoding the clk_freq[1:0] input port
 		case (clk_freq)
+			// 1 MHz
 			2'b00   :   begin 
 						filling_water_duration  <= 32'h7270e00;
 						washing_duration        <= 32'h11e1a300;
 						rinsing_duration        <= 32'h7270e00;
 						spinning_duration       <= 32'h3938700;
 						end
+			// 2 MHz
 			2'b01   :   begin 
 						filling_water_duration  <= 32'he4e1c00;
 						washing_duration        <= 32'h23c34600;
 						rinsing_duration        <= 32'he4e1c00;
 						spinning_duration       <= 32'h7270e00;
 						end
+			// 4 MHz
 			2'b10   :   begin 
 						filling_water_duration  <= 32'h1c9c3800;
 						washing_duration        <= 32'h47868c00;
 						rinsing_duration        <= 32'h1c9c3800;
 						spinning_duration       <= 32'he4e1c00;
 						end
+			// 8 MHz
 			2'b11   :   begin 
 						filling_water_duration  <= 32'h39387000;
 						washing_duration        <= 32'h8f0d1800;
