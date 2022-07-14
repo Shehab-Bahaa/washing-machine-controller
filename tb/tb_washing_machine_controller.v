@@ -89,7 +89,7 @@ module tb_washing_machine_controller;
 			if (TEST2)	$display("//=============================================================================\n// Test Scenario started (double_wash and timer_pause)\n//=============================================================================");
 			else		$display("//=============================================================================\n// Test Scenario started (No double_wash and no timer_pause)\n//=============================================================================");			
 			fork
-				// Driving
+				// Driving the input signal
 				begin
 											coin_in		= 1;
 					if (TEST2)				double_wash = 1;
@@ -102,7 +102,7 @@ module tb_washing_machine_controller;
 						#(1*10**6*60)		timer_pause = 0;	// the pause duration is one minute
 					end
 				end
-				// Monitoring
+				// Monitoring part performs multiple checks whenever the state of the DUT changes.
 				begin
 											if (DUT.state === 0) 	$display("\"SUCCESSFUL IDLE state\""); 
 											else begin 				$display("\"FAILED IDLE state\""); $finish; end
@@ -151,14 +151,19 @@ module tb_washing_machine_controller;
 // Main Code
 //=========================================================
 	initial begin
-		//$monitor("[$monitor] time= %0t, state = %0d", $realtime, DUT.state);
+		//=================================================================================================================================================================================================
+		// the DUT is initially reseted, then test 1 runs. After 0.5 minute in the idle state, the second test is applied. Both tests are applied consecutively which constitutes the third test scenario.
+		// The content of the generic_test is modified using flags to select the required test scenario. Also, the clk frequency changes for each test scenario.
+		//=================================================================================================================================================================================================
+		//$monitor("[$monitor] time= %0t, state = %0d", $realtime, DUT.state); // used for debugging
 		// RESET
 		rst_n = 0;
 		@(negedge clk)	rst_n 		= 1;
 		@(negedge clk)
-		// Selecting the test scenario
+		// Test Scenario 1
 		clk_freq 	= 2'b10;
 		generic_test();
+		// Test Scenario 2
 		TEST2 = 1;
 		#(0.5*10**6*60)
 		@(negedge clk)

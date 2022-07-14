@@ -7,16 +7,16 @@ Description    :
 Owner          : Shehab Bahaa
 */
 module washing_machine_controller (
-	input rst_n,    // Active low asynchronous clock
-	input clk,      // System clock
+	input 		rst_n,    // Active low asynchronous clock
+	input 		clk,      // System clock
 
 	input [1:0] clk_freq,   // Input Clock Frequency Configuration Code
-	// control inputs
-	input coin_in,			// Input flag which is asserted when a coin is deposited
-	input double_wash,		// Input flag which is asserted if the user requires double wash option
-	input timer_pause,		// Input flag when it is set to ‘1’ spinning phase is paused until this flag is de-asserted
+
+	input 		coin_in,			// Input flag which is asserted when a coin is deposited
+	input 		double_wash,		// Input flag which is asserted if the user requires double wash option
+	input 		timer_pause,		// Input flag when it is set to ‘1’ spinning phase is paused until this flag is de-asserted
 	// outputs
-	output reg wash_done	// Active high output asserted when spinning phase is done and deasserted when coin_in is set to ‘1’
+	output reg 	wash_done	// Active high output asserted when spinning phase is done and deasserted when coin_in is set to ‘1’
 );
 
 //=========================================================
@@ -32,7 +32,7 @@ module washing_machine_controller (
 //=========================================================
 // reg declarations
 //=========================================================
-	reg [2:0]   state; // next state 
+	reg [2:0]   state; 					// next state 
 	reg [31:0]  clock_count;
 	reg 		second_wash_flag;
 	reg			paused_spinning_flag;
