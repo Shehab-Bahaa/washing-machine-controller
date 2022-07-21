@@ -1,8 +1,8 @@
 ################################ Makefile for washing machine controller Project
 # =============================================================================
 # Project Paths
-rtl_path  = "F:/MixelTask/washing_machine/rtl"
-tb_path   = "F:/MixelTask/washing_machine/tb"
+rtl_path  = "F:/washing_machine/rtl"
+tb_path   = "F:/washing_machine/tb"
 work_path = "../questa_directory"
 # =============================================================================
 # FLAGS
@@ -25,15 +25,6 @@ endif
 ################## Target for Makefile help
 help:
 	@echo ============================================================================ 
-	@echo  " ------------------------- Test TARGETS -------------------------------- "
-	@echo  " compile_all_rtl => Compile TB and DUT files                             "
-	@echo  " run             => Compile TB and DUT files and run the simulation      "
-	@echo  "                                                                         "
-	@echo  " -------------------- ADMINISTRATIVE TARGETS --------------------------- "
-	@echo  " help       => Displays this message                                     "
-	@echo  " clean      => Remove all intermediate simv and log files                "
-	@echo  "								         "
-	@echo  " ---------------------- EMBEDDED SETTINGS ------------------------------ "
-	@echo  " -timescale=\"1ns/100ps\"                                                "
-	@echo  " -debug_all                                                              "
+	@echo  " compile_all	 => Compile TB and DUT files                             "
+	@echo  " run             => Run the simulation      							 "
 	@echo ============================================================================  
